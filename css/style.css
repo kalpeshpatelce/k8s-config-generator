@@ -633,3 +633,38 @@ select {
     text-align: center;
     padding: 40px;
 }
+
+/* ===== Playground Buttons ===== */
+.playground-btn {
+    display: inline-block;
+    padding: 10px 18px;
+    margin: 4px 8px 4px 0;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all var(--transition);
+}
+
+.killercoda-btn {
+    background: #2d6b3f;
+    color: #a8f0c0;
+    border: 1px solid #3d8b52;
+}
+
+.killercoda-btn:hover {
+    background: #3d8b52;
+    color: #ffffff;
+}
+
+.cloudkida-btn {
+    background: #1a4a6b;
+    color: #8dd6f8;
+    border: 1px solid #2a6a8b;
+}
+
+.cloudkida-btn:hover {
+    background: #2a6a8b;
+    color: #ffffff;
+}

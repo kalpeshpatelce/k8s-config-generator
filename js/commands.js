@@ -96,9 +96,9 @@ function generateKubectlCommands() {
         html += `<div class="kubectl-section">`;
         html += `<h3>Port Forwarding</h3>`;
         if (resources.includes('service')) {
-            html += `<span class="kubectl-cmd" onclick="copyCommand(this)">kubectl port-forward svc/${data.name} ${data.containerPort}:${data.containerPort}${ns}</span>`;
+            html += `<span class="kubectl-cmd" onclick="copyCommand(this)">kubectl port-forward --address 0.0.0.0 svc/${data.name} ${data.containerPort}:${data.containerPort}${ns}</span>`;
         }
-        html += `<span class="kubectl-cmd" onclick="copyCommand(this)">kubectl port-forward deploy/${data.name} ${data.containerPort}:${data.containerPort}${ns}</span>`;
+        html += `<span class="kubectl-cmd" onclick="copyCommand(this)">kubectl port-forward --address 0.0.0.0 deploy/${data.name} ${data.containerPort}:${data.containerPort}${ns}</span>`;
         html += `</div>`;
     }
 
@@ -174,6 +174,14 @@ function generateKubectlCommands() {
     html += `<span class="kubectl-cmd" onclick="copyCommand(this)">kubectl get events --sort-by='.lastTimestamp'${ns}</span>`;
     html += `<span class="kubectl-cmd" onclick="copyCommand(this)">kubectl top pods -l app=${data.name}${ns}</span>`;
     html += `<span class="kubectl-cmd" onclick="copyCommand(this)">kubectl get pods -l app=${data.name} -o wide${ns}</span>`;
+    html += `</div>`;
+
+    // Practice Playgrounds
+    html += `<div class="kubectl-section">`;
+    html += `<h3>Practice Playgrounds</h3>`;
+    html += `<p style="color: var(--text-secondary); font-size: 0.82rem; margin-bottom: 10px;">Try your generated configs on these free Kubernetes playgrounds:</p>`;
+    html += `<a href="https://killercoda.com/playgrounds/scenario/kubernetes" target="_blank" rel="noopener noreferrer" class="playground-btn killercoda-btn">☸ Practice on KillerCoda</a>`;
+    html += `<a href="https://cloudkida.com/" target="_blank" rel="noopener noreferrer" class="playground-btn cloudkida-btn">☁ Practice on CloudKida</a>`;
     html += `</div>`;
 
     return html;
