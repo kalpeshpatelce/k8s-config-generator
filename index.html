@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>K8s Config Generator</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="sticky-header">
+        <h1>⎈ K8s Config Generator</h1>
+        <div class="header-actions">
+            <select id="presets" aria-label="Load preset configuration">
+                <option value="">Load Preset...</option>
+                <option value="simple-web">Simple Web App</option>
+                <option value="redis-cache">Redis Cache</option>
+                <option value="postgres-statefulset">PostgreSQL StatefulSet</option>
+                <option value="nginx-ingress">Nginx with Ingress</option>
+                <option value="cronjob-backup">CronJob Backup</option>
+            </select>
+            <button id="resetBtn" class="btn btn-secondary">Reset</button>
+        </div>
+    </header>
+
+    <main class="split-container">
+        <!-- Left Panel - Input Form -->
+        <aside class="left-panel" id="leftPanel">
+            <form id="k8sForm" novalidate>
+
+                <!-- Basic Configuration -->
+                <section class="form-section" data-section="basic">
+                    <h2 class="section-title">Basic Configuration</h2>
+                    <div class="form-group">
+                        <label for="dockerImage">Docker Image <span class="required">*</span></label>
+                        <input type="text" id="dockerImage" placeholder="nginx:latest" required>
+                        <small class="help-text">e.g., nginx:1.25, myapp:v1.0.0</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="appName">App Name <span class="required">*</span></label>
+                        <input type="text" id="appName" placeholder="my-app" required pattern="[a-z0-9]([-a-z0-9]*[a-z0-9])?">
+                        <small class="help-text">Lowercase, alphanumeric, hyphens allowed</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="namespace">Namespace</label>
+                        <input type="text" id="namespace" placeholder="default" value="default">
+                    </div>
+                    <div class="form-group">
+                        <label for="replicas">Replicas</label>
+                        <input type="number" id="replicas" value="1" min="1" max="100">
+                    </div>
+                    <div class="form-group">
+                        <label for="containerPort">Container Port</label>
+                        <input type="number" id="containerPort" placeholder="80" min="1" max="65535">
+                    </div>
+                    <div class="form-group">
+                        <label for="labels">Labels</label>
+                        <input type="text" id="labels" placeholder="env=production,tier=frontend">
+                        <small class="help-text">key=value, comma separated</small>
+                    </div>
+                </section>
+
+                <!-- Resource Type Selection -->
+                <section class="form-section" data-section="resources">
+                    <h2 class="section-title">Resource Types</h2>
+                    <div class="checkbox-grid">
+                        <label class="checkbox-label"><input type="checkbox" name="resourceType" value="pod"> Pod</label>
+                        <label class="checkbox-label"><input type="checkbox" name="resourceType" value="deployment" checked> Deployment</label>
+                        <label class="checkbox-label"><input type="checkbox" name="resourceType" value="service"> Service</label>
+                        <label class="checkbox-label"><input type="checkbox" name="resourceType" value="replicaset"> ReplicaSet</label>
+                        <label class="checkbox-label"><input type="checkbox" name="resourceType" value="statefulset"> StatefulSet</label>
+                        <label class="checkbox-label"><input type="checkbox" name="resourceType" value="daemonset"> DaemonSet</label>
+                        <label class="checkbox-label"><input type="checkbox" name="resourceType" value="job"> Job</label>
+                        <label class="checkbox-label"><input type="checkbox" name="resourceType" value="cronjob"> CronJob</label>
+                        <label class="checkbox-label"><input type="checkbox" name="resourceType" value="ingress"> Ingress</label>
+                        <label class="checkbox-label"><input type="checkbox" name="resourceType" value="configmap"> ConfigMap</label>
+                        <label class="checkbox-label"><input type="checkbox" name="resourceType" value="secret"> Secret</label>
+                        <label class="checkbox-label"><input type="checkbox" name="resourceType" value="pvc"> PVC</label>
+                        <label class="checkbox-label"><input type="checkbox" name="resourceType" value="hpa"> HPA</label>
+                        <label class="checkbox-label"><input type="checkbox" name="resourceType" value="networkpolicy"> NetworkPolicy</label>
+                    </div>
+                </section>
+
+                <!-- Service Configuration -->
+                <section class="form-section conditional-section" data-section="service" id="serviceSection" style="display:none;">
+                    <h2 class="section-title">Service Configuration</h2>
+                    <div class="form-group">
+                        <label for="serviceType">Service Type</label>
+                        <select id="serviceType">
+                            <option value="ClusterIP">ClusterIP</option>
+                            <option value="NodePort">NodePort</option>
+                            <option value="LoadBalancer">LoadBalancer</option>
+                            <option value="ExternalName">ExternalName</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="targetPort">Target Port</label>
+                        <input type="number" id="targetPort" placeholder="80" min="1" max="65535">
+                    </div>
+                    <div class="form-group" id="nodePortGroup" style="display:none;">
+                        <label for="nodePort">Node Port</label>
+                        <input type="number" id="nodePort" placeholder="30000" min="30000" max="32767">
+                        <small class="help-text">Range: 30000-32767</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="protocol">Protocol</label>
+                        <select id="protocol">
+                            <option value="TCP">TCP</option>
+                            <option value="UDP">UDP</option>
+                        </select>
+                    </div>
+                </section>
+
+                <!-- Ingress Configuration -->
+                <section class="form-section conditional-section" data-section="ingress" id="ingressSection" style="display:none;">
+                    <h2 class="section-title">Ingress Configuration</h2>
+                    <div class="form-group">
+                        <label for="ingressHost">Host</label>
+                        <input type="text" id="ingressHost" placeholder="app.example.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="ingressPath">Path</label>
+                        <input type="text" id="ingressPath" placeholder="/" value="/">
+                    </div>
+                    <div class="form-group">
+                        <label for="pathType">Path Type</label>
+                        <select id="pathType">
+                            <option value="Prefix">Prefix</option>
+                            <option value="Exact">Exact</option>
+                            <option value="ImplementationSpecific">ImplementationSpecific</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="tlsSecretName">TLS Secret Name</label>
+                        <input type="text" id="tlsSecretName" placeholder="tls-secret">
+                    </div>
+                    <div class="form-group">
+                        <label for="ingressClass">Ingress Class</label>
+                        <select id="ingressClass">
+                            <option value="nginx">nginx</option>
+                            <option value="traefik">traefik</option>
+                            <option value="haproxy">haproxy</option>
+                            <option value="alb">alb (AWS)</option>
+                        </select>
+                    </div>
+                </section>
+
+                <!-- Resource Limits -->
+                <section class="form-section" data-section="resources-limits">
+                    <h2 class="section-title">Resource Limits</h2>
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label for="cpuRequest">CPU Request</label>
+                            <input type="text" id="cpuRequest" placeholder="100m">
+                        </div>
+                        <div class="form-group half">
+                            <label for="cpuLimit">CPU Limit</label>
+                            <input type="text" id="cpuLimit" placeholder="500m">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label for="memoryRequest">Memory Request</label>
+                            <input type="text" id="memoryRequest" placeholder="128Mi">
+                        </div>
+                        <div class="form-group half">
+                            <label for="memoryLimit">Memory Limit</label>
+                            <input type="text" id="memoryLimit" placeholder="256Mi">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Environment Variables -->
+                <section class="form-section" data-section="env">
+                    <h2 class="section-title">Environment Variables</h2>
+                    <div id="envVars">
+                        <div class="env-row">
+                            <input type="text" placeholder="KEY" class="env-key">
+                            <input type="text" placeholder="value" class="env-value">
+                            <button type="button" class="btn btn-remove" aria-label="Remove environment variable">&#10005;</button>
+                        </div>
+                    </div>
+                    <button type="button" id="addEnvBtn" class="btn btn-small">+ Add Variable</button>
+                </section>
+
+                <!-- Volume Mounts -->
+                <section class="form-section" data-section="volumes">
+                    <h2 class="section-title">Volume Mounts</h2>
+                    <div id="volumeMounts">
+                        <div class="volume-row">
+                            <input type="text" placeholder="Volume Name" class="vol-name">
+                            <input type="text" placeholder="/mount/path" class="vol-path">
+                            <select class="vol-type">
+                                <option value="">Type...</option>
+                                <option value="emptyDir">emptyDir</option>
+                                <option value="hostPath">hostPath</option>
+                                <option value="pvc">PVC</option>
+                                <option value="configMap">ConfigMap</option>
+                                <option value="secret">Secret</option>
+                            </select>
+                            <button type="button" class="btn btn-remove" aria-label="Remove volume mount">&#10005;</button>
+                        </div>
+                    </div>
+                    <button type="button" id="addVolumeBtn" class="btn btn-small">+ Add Volume</button>
+                </section>
+
+                <!-- Probes -->
+                <section class="form-section" data-section="probes">
+                    <h2 class="section-title">Probes</h2>
+                    <div class="probe-group">
+                        <h3>Liveness Probe</h3>
+                        <div class="form-group">
+                            <label for="livenessType">Probe Type</label>
+                            <select id="livenessType">
+                                <option value="">None</option>
+                                <option value="httpGet">httpGet</option>
+                                <option value="tcpSocket">tcpSocket</option>
+                                <option value="exec">exec</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="livenessPath">Path (httpGet)</label>
+                            <input type="text" id="livenessPath" placeholder="/healthz">
+                        </div>
+                        <div class="form-group">
+                            <label for="livenessPort">Port</label>
+                            <input type="number" id="livenessPort" placeholder="80">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group half">
+                                <label for="livenessInitialDelay">Initial Delay (s)</label>
+                                <input type="number" id="livenessInitialDelay" placeholder="30" value="30">
+                            </div>
+                            <div class="form-group half">
+                                <label for="livenessPeriod">Period (s)</label>
+                                <input type="number" id="livenessPeriod" placeholder="10" value="10">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="probe-group">
+                        <h3>Readiness Probe</h3>
+                        <div class="form-group">
+                            <label for="readinessType">Probe Type</label>
+                            <select id="readinessType">
+                                <option value="">None</option>
+                                <option value="httpGet">httpGet</option>
+                                <option value="tcpSocket">tcpSocket</option>
+                                <option value="exec">exec</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="readinessPath">Path (httpGet)</label>
+                            <input type="text" id="readinessPath" placeholder="/ready">
+                        </div>
+                        <div class="form-group">
+                            <label for="readinessPort">Port</label>
+                            <input type="number" id="readinessPort" placeholder="80">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group half">
+                                <label for="readinessInitialDelay">Initial Delay (s)</label>
+                                <input type="number" id="readinessInitialDelay" placeholder="5" value="5">
+                            </div>
+                            <div class="form-group half">
+                                <label for="readinessPeriod">Period (s)</label>
+                                <input type="number" id="readinessPeriod" placeholder="10" value="10">
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- CronJob Configuration -->
+                <section class="form-section conditional-section" data-section="cronjob" id="cronjobSection" style="display:none;">
+                    <h2 class="section-title">CronJob Configuration</h2>
+                    <div class="form-group">
+                        <label for="cronSchedule">Cron Schedule</label>
+                        <input type="text" id="cronSchedule" placeholder="*/5 * * * *">
+                        <small class="help-text">e.g., "0 2 * * *" = daily at 2am</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="cronRestartPolicy">Restart Policy</label>
+                        <select id="cronRestartPolicy">
+                            <option value="OnFailure">OnFailure</option>
+                            <option value="Never">Never</option>
+                        </select>
+                    </div>
+                </section>
+
+                <!-- HPA Configuration -->
+                <section class="form-section conditional-section" data-section="hpa" id="hpaSection" style="display:none;">
+                    <h2 class="section-title">HPA Configuration</h2>
+                    <div class="form-group">
+                        <label for="hpaMinReplicas">Min Replicas</label>
+                        <input type="number" id="hpaMinReplicas" value="1" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="hpaMaxReplicas">Max Replicas</label>
+                        <input type="number" id="hpaMaxReplicas" value="10" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="hpaTargetCPU">Target CPU Utilization (%)</label>
+                        <input type="number" id="hpaTargetCPU" value="80" min="1" max="100">
+                    </div>
+                </section>
+
+                <!-- Advanced Options -->
+                <section class="form-section" data-section="advanced">
+                    <h2 class="section-title">Advanced Options</h2>
+                    <div class="form-group">
+                        <label for="imagePullPolicy">Image Pull Policy</label>
+                        <select id="imagePullPolicy">
+                            <option value="IfNotPresent">IfNotPresent</option>
+                            <option value="Always">Always</option>
+                            <option value="Never">Never</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="restartPolicy">Restart Policy</label>
+                        <select id="restartPolicy">
+                            <option value="Always">Always</option>
+                            <option value="OnFailure">OnFailure</option>
+                            <option value="Never">Never</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="serviceAccountName">Service Account Name</label>
+                        <input type="text" id="serviceAccountName" placeholder="default">
+                    </div>
+                    <div class="form-group">
+                        <label for="nodeSelector">Node Selector</label>
+                        <input type="text" id="nodeSelector" placeholder="disktype=ssd">
+                        <small class="help-text">key=value format</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="tolerations">Tolerations</label>
+                        <input type="text" id="tolerations" placeholder="key=value:NoSchedule">
+                        <small class="help-text">key=value:effect</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="annotations">Annotations</label>
+                        <input type="text" id="annotations" placeholder="prometheus.io/scrape=true">
+                        <small class="help-text">key=value, comma separated</small>
+                    </div>
+                </section>
+
+            </form>
+        </aside>
+
+        <!-- Right Panel - Output -->
+        <section class="right-panel" id="rightPanel">
+            <div class="output-header">
+                <div class="tabs" id="outputTabs" role="tablist">
+                    <button class="tab active" data-tab="combined" role="tab" aria-selected="true">Combined YAML</button>
+                </div>
+                <div class="output-actions">
+                    <button id="downloadAllBtn" class="btn btn-primary">Download All</button>
+                </div>
+            </div>
+            <div class="output-content" id="outputContent">
+                <div class="tab-content active" id="tab-combined">
+                    <div class="output-toolbar">
+                        <button class="btn btn-copy" data-target="combined">Copy</button>
+                        <button class="btn btn-download" data-target="combined">Download</button>
+                    </div>
+                    <pre class="yaml-output" id="yaml-combined"><code></code></pre>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="js/generators.js"></script>
+    <script src="js/commands.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
