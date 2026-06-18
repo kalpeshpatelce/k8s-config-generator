@@ -638,33 +638,47 @@ select {
 .playground-btn {
     display: inline-flex;
     align-items: center;
-    padding: 8px 16px;
-    border-radius: 6px;
-    font-size: 0.82rem;
-    font-weight: 600;
+    gap: 6px;
+    padding: 10px 22px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 700;
     text-decoration: none;
     cursor: pointer;
-    transition: all var(--transition);
+    white-space: nowrap;
+    min-width: max-content;
+    letter-spacing: 0.02em;
+    transition: all 0.25s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.playground-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+.playground-btn:active {
+    transform: translateY(0);
 }
 
 .killercoda-btn {
-    background: #2d6b3f;
-    color: #a8f0c0;
-    border: 1px solid #3d8b52;
+    background: linear-gradient(135deg, #1a4a6b, #2570a0);
+    color: #8dd6f8;
+    border: 1px solid #3080b0;
 }
 
 .killercoda-btn:hover {
-    background: #3d8b52;
+    background: linear-gradient(135deg, #2570a0, #3090c0);
     color: #ffffff;
 }
 
 .cloudkida-btn {
-    background: #1a4a6b;
-    color: #8dd6f8;
-    border: 1px solid #2a6a8b;
+    background: linear-gradient(135deg, #1e7a3a, #2da050);
+    color: #a8f0c0;
+    border: 1px solid #3db060;
 }
 
 .cloudkida-btn:hover {
-    background: #2a6a8b;
+    background: linear-gradient(135deg, #2da050, #3fc068);
     color: #ffffff;
 }
