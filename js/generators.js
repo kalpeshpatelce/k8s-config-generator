@@ -129,6 +129,17 @@ function getFormData() {
         epIP: document.getElementById('epIP').value.trim(),
         epPort: parseInt(document.getElementById('epPort').value) || null,
         epPortName: document.getElementById('epPortName').value.trim(),
+        // CSI Storage
+        csiDriver: document.getElementById('csiDriver').value,
+        csiVolumeHandle: document.getElementById('csiVolumeHandle').value.trim(),
+        csiCapacity: document.getElementById('csiCapacity').value.trim() || '50Gi',
+        csiAccessMode: document.getElementById('csiAccessMode').value,
+        csiFsType: document.getElementById('csiFsType').value,
+        csiReadOnly: document.getElementById('csiReadOnly').value,
+        csiMountOptions: document.getElementById('csiMountOptions').value.trim(),
+        // StorageClass extras
+        scFsType: document.getElementById('scFsType').value,
+        scEncrypted: document.getElementById('scEncrypted').value,
         // Dynamic
         envVars: getEnvVars(),
         volumes: getVolumes(),
@@ -836,14 +847,38 @@ function generateStorageClass(data) {
     yaml += `volumeBindingMode: ${data.scVolumeBindingMode}\n`;
     yaml += `allowVolumeExpansion: ${data.scAllowExpansion}\n`;
     yaml += `parameters:\n`;
+    yaml += `  fsType: ${data.scFsType}\n`;
+    if (data.scEncrypted === 'true') {
+        yaml += `  encrypted: "true"\n`;
+    }
     if (data.scProvisioner.includes('aws') || data.scProvisioner.includes('ebs')) {
         yaml += `  type: gp3\n`;
-        yaml += `  fsType: ext4\n`;
+    } else if (data.scProvisioner.includes('efs')) {
+        yaml += `  provisioningMode: efs-ap\n`;
+        yaml += `  directoryPerms: "700"\n`;
     } else if (data.scProvisioner.includes('gce') || data.scProvisioner.includes('gke')) {
         yaml += `  type: pd-standard\n`;
-    } else if (data.scProvisioner.includes('azure')) {
-        yaml += `  storageaccounttype: Standard_LRS\n`;
+    } else if (data.scProvisioner.includes('filestore')) {
+        yaml += `  tier: standard\n`;
+        yaml += `  network: default\n`;
+    } else if (data.scProvisioner.includes('azure') && data.scProvisioner.includes('disk')) {
+        yaml += `  storageaccounttype: Premium_LRS\n`;
         yaml += `  kind: Managed\n`;
+    } else if (data.scProvisioner.includes('azure') && data.scProvisioner.includes('file')) {
+        yaml += `  skuName: Premium_LRS\n`;
+    } else if (data.scProvisioner.includes('ceph') && data.scProvisioner.includes('rbd')) {
+        yaml += `  clusterID: rook-ceph\n`;
+        yaml += `  pool: replicapool\n`;
+        yaml += `  imageFormat: "2"\n`;
+    } else if (data.scProvisioner.includes('ceph') && data.scProvisioner.includes('cephfs')) {
+        yaml += `  clusterID: rook-ceph\n`;
+        yaml += `  fsName: myfs\n`;
+    } else if (data.scProvisioner.includes('nfs')) {
+        yaml += `  server: nfs-server.example.com\n`;
+        yaml += `  share: /exports\n`;
+    } else if (data.scProvisioner.includes('longhorn')) {
+        yaml += `  numberOfReplicas: "3"\n`;
+        yaml += `  staleReplicaTimeout: "2880"\n`;
     }
     return yaml;
 }
@@ -1110,6 +1145,57 @@ function generateEndpoints(data) {
     return yaml;
 }
 
+function generateCSIStorage(data) {
+    let yaml = `# CSI PersistentVolume: ${data.name}-csi-pv\n`;
+    yaml += `apiVersion: v1\n`;
+    yaml += `kind: PersistentVolume\n`;
+    yaml += `metadata:\n`;
+    yaml += `  name: ${data.name}-csi-pv\n`;
+    yaml += `  labels:\n`;
+    yaml += `    app: "${data.name}"\n`;
+    yaml += `spec:\n`;
+    yaml += `  capacity:\n`;
+    yaml += `    storage: ${data.csiCapacity}\n`;
+    yaml += `  accessModes:\n`;
+    yaml += `    - ${data.csiAccessMode}\n`;
+    yaml += `  persistentVolumeReclaimPolicy: Retain\n`;
+    if (data.csiMountOptions) {
+        yaml += `  mountOptions:\n`;
+        data.csiMountOptions.split(',').map(o => o.trim()).forEach(opt => {
+            yaml += `    - ${opt}\n`;
+        });
+    }
+    yaml += `  csi:\n`;
+    yaml += `    driver: ${data.csiDriver}\n`;
+    yaml += `    volumeHandle: ${data.csiVolumeHandle || data.name + '-vol-001'}\n`;
+    yaml += `    fsType: ${data.csiFsType}\n`;
+    yaml += `    readOnly: ${data.csiReadOnly}\n`;
+    if (data.csiDriver.includes('efs')) {
+        yaml += `    volumeAttributes:\n`;
+        yaml += `      encryptInTransit: "true"\n`;
+    }
+    if (data.csiDriver.includes('nfs')) {
+        yaml += `    volumeAttributes:\n`;
+        yaml += `      server: "nfs-server.example.com"\n`;
+        yaml += `      share: "/exports/${data.name}"\n`;
+    }
+
+    yaml += `\n---\n\n`;
+    yaml += `# CSI PersistentVolumeClaim: ${data.name}-csi-pvc\n`;
+    yaml += `apiVersion: v1\n`;
+    yaml += `kind: PersistentVolumeClaim\n`;
+    yaml += generateMetadata(data);
+    yaml += `spec:\n`;
+    yaml += `  accessModes:\n`;
+    yaml += `    - ${data.csiAccessMode}\n`;
+    yaml += `  resources:\n`;
+    yaml += `    requests:\n`;
+    yaml += `      storage: ${data.csiCapacity}\n`;
+    yaml += `  volumeName: ${data.name}-csi-pv\n`;
+    yaml += `  storageClassName: ""\n`;
+    return yaml;
+}
+
 // ===== Main Generate Function =====
 
 function generateAllYAML() {
@@ -1149,6 +1235,7 @@ function generateAllYAML() {
         pdb: generatePDB,
         priorityclass: generatePriorityClass,
         endpoints: generateEndpoints,
+        csistorage: generateCSIStorage,
     };
 
     resources.forEach(resource => {

@@ -636,6 +636,62 @@ select {
     padding: 40px;
 }
 
+/* ===== Helm Guide Styles ===== */
+.helm-guide-output {
+    padding: 16px !important;
+}
+
+.helm-section {
+    margin-bottom: 20px;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    background: var(--bg-tertiary);
+}
+
+.helm-section h3 {
+    color: var(--accent-purple);
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.helm-desc {
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+    margin: 6px 0;
+    line-height: 1.5;
+}
+
+.helm-tree {
+    background: var(--bg-primary);
+    padding: 12px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 0.78rem;
+    color: var(--accent-cyan);
+    line-height: 1.6;
+    white-space: pre;
+    overflow-x: auto;
+}
+
+.helm-code {
+    background: var(--bg-primary);
+    padding: 12px;
+    border-radius: 4px;
+    margin: 8px 0;
+    overflow-x: auto;
+}
+
+.helm-code code {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 0.78rem;
+    color: var(--accent-green);
+    line-height: 1.6;
+    white-space: pre;
+}
+
 /* ===== Playground Buttons ===== */
 .playground-btn {
     display: inline-flex;

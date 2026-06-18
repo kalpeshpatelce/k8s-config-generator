@@ -129,6 +129,7 @@ function handleResourceToggle(e) {
         resourcequota: 'resourcequotaSection',
         priorityclass: 'priorityclassSection',
         endpoints: 'endpointsSection',
+        csistorage: 'csistorageSection',
     };
 
     if (sectionMap[value]) {
@@ -219,6 +220,12 @@ function updateOutput() {
     if (cmdEl) {
         cmdEl.innerHTML = generateKubectlCommands();
     }
+
+    // Update helm guide tab
+    const helmEl = document.querySelector('#tab-helm .yaml-output');
+    if (helmEl) {
+        helmEl.innerHTML = generateHelmGuide();
+    }
 }
 
 function updateTabs(resources) {
@@ -236,6 +243,7 @@ function updateTabs(resources) {
     });
 
     tabsHTML += `<button class="tab${activeTabId === 'kubectl' ? ' active' : ''}" data-tab="kubectl" role="tab">kubectl Commands</button>`;
+    tabsHTML += `<button class="tab${activeTabId === 'helm' ? ' active' : ''}" data-tab="helm" role="tab">Helm Chart</button>`;
     tabsContainer.innerHTML = tabsHTML;
 
     // Build content HTML
@@ -267,6 +275,14 @@ function updateTabs(resources) {
             <pre class="yaml-output" style="white-space:normal;font-family:inherit;"></pre>
         </div>`;
 
+    contentHTML += `
+        <div class="tab-content${activeTabId === 'helm' ? ' active' : ''}" id="tab-helm">
+            <div class="output-toolbar">
+                <button class="btn btn-copy" data-target="helm">Copy</button>
+            </div>
+            <pre class="yaml-output helm-guide-output" style="white-space:normal;font-family:inherit;"></pre>
+        </div>`;
+
     contentContainer.innerHTML = contentHTML;
 }
 
@@ -281,7 +297,8 @@ function getResourceLabel(resource) {
         serviceaccount: 'ServiceAccount', role: 'Role', rolebinding: 'RoleBinding',
         clusterrole: 'ClusterRole', clusterrolebinding: 'ClusterRoleBinding',
         limitrange: 'LimitRange', resourcequota: 'ResourceQuota',
-        pdb: 'PDB', priorityclass: 'PriorityClass', endpoints: 'Endpoints'
+        pdb: 'PDB', priorityclass: 'PriorityClass', endpoints: 'Endpoints',
+        csistorage: 'CSI Storage'
     };
     return labels[resource] || resource;
 }
@@ -400,6 +417,14 @@ function handleCopy(btn) {
         // Get all kubectl commands as plain text
         const cmds = document.querySelectorAll('#tab-kubectl .kubectl-cmd');
         text = Array.from(cmds).map(c => c.textContent).join('\n');
+    } else if (target === 'helm') {
+        // Get all helm commands and code as plain text
+        const helmCmds = document.querySelectorAll('#tab-helm .kubectl-cmd');
+        const helmCodes = document.querySelectorAll('#tab-helm .helm-code code');
+        const parts = [];
+        helmCmds.forEach(c => parts.push(c.textContent));
+        helmCodes.forEach(c => parts.push(c.textContent));
+        text = parts.join('\n');
     } else if (target === 'combined') {
         const result = generateAllYAML();
         text = result.combined;
@@ -570,6 +595,7 @@ function loadState() {
                 resourcequota: 'resourcequotaSection',
                 priorityclass: 'priorityclassSection',
                 endpoints: 'endpointsSection',
+                csistorage: 'csistorageSection',
             };
             Object.entries(sectionMap).forEach(([resource, sectionId]) => {
                 const section = document.getElementById(sectionId);
@@ -619,6 +645,7 @@ function resetForm() {
     document.getElementById('resourcequotaSection').style.display = 'none';
     document.getElementById('priorityclassSection').style.display = 'none';
     document.getElementById('endpointsSection').style.display = 'none';
+    document.getElementById('csistorageSection').style.display = 'none';
 
     // Reset env vars and volumes to single empty row
     document.getElementById('envVars').innerHTML = `

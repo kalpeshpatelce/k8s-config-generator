@@ -92,6 +92,7 @@
                         <label class="checkbox-label"><input type="checkbox" name="resourceType" value="pdb"> PodDisruptionBudget</label>
                         <label class="checkbox-label"><input type="checkbox" name="resourceType" value="priorityclass"> PriorityClass</label>
                         <label class="checkbox-label"><input type="checkbox" name="resourceType" value="endpoints"> Endpoints</label>
+                        <label class="checkbox-label"><input type="checkbox" name="resourceType" value="csistorage"> CSI Storage (PV+PVC)</label>
                     </div>
                 </section>
 
@@ -374,13 +375,24 @@
                     <div class="form-group">
                         <label for="scProvisioner">Provisioner</label>
                         <select id="scProvisioner">
-                            <option value="kubernetes.io/aws-ebs">AWS EBS</option>
-                            <option value="kubernetes.io/gce-pd">GCE PD</option>
-                            <option value="kubernetes.io/azure-disk">Azure Disk</option>
+                            <option value="kubernetes.io/aws-ebs">AWS EBS (in-tree)</option>
+                            <option value="kubernetes.io/gce-pd">GCE PD (in-tree)</option>
+                            <option value="kubernetes.io/azure-disk">Azure Disk (in-tree)</option>
                             <option value="kubernetes.io/no-provisioner">No Provisioner (Local)</option>
                             <option value="ebs.csi.aws.com">AWS EBS CSI</option>
+                            <option value="efs.csi.aws.com">AWS EFS CSI</option>
                             <option value="pd.csi.storage.gke.io">GKE PD CSI</option>
+                            <option value="filestore.csi.storage.gke.io">GKE Filestore CSI</option>
                             <option value="disk.csi.azure.com">Azure Disk CSI</option>
+                            <option value="file.csi.azure.com">Azure File CSI</option>
+                            <option value="cinder.csi.openstack.org">OpenStack Cinder CSI</option>
+                            <option value="nfs.csi.k8s.io">NFS CSI</option>
+                            <option value="csi.vsphere.vmware.com">vSphere CSI</option>
+                            <option value="rook-ceph.rbd.csi.ceph.com">Rook Ceph RBD CSI</option>
+                            <option value="rook-ceph.cephfs.csi.ceph.com">Rook CephFS CSI</option>
+                            <option value="longhorn">Longhorn</option>
+                            <option value="openebs.io/local">OpenEBS Local</option>
+                            <option value="driver.longhorn.io">Longhorn CSI</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -403,6 +415,80 @@
                             <option value="true">Yes</option>
                             <option value="false">No</option>
                         </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="scFsType">Filesystem Type</label>
+                        <select id="scFsType">
+                            <option value="ext4">ext4</option>
+                            <option value="xfs">xfs</option>
+                            <option value="ntfs">ntfs</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="scEncrypted">Encryption</label>
+                        <select id="scEncrypted">
+                            <option value="false">No</option>
+                            <option value="true">Yes</option>
+                        </select>
+                    </div>
+                </section>
+
+                <!-- External / CSI Storage -->
+                <section class="form-section conditional-section" data-section="csistorage" id="csistorageSection" style="display:none;">
+                    <h2 class="section-title">External & CSI Storage</h2>
+                    <div class="form-group">
+                        <label for="csiDriver">CSI Driver</label>
+                        <select id="csiDriver">
+                            <option value="ebs.csi.aws.com">AWS EBS CSI</option>
+                            <option value="efs.csi.aws.com">AWS EFS CSI</option>
+                            <option value="pd.csi.storage.gke.io">GCP PD CSI</option>
+                            <option value="filestore.csi.storage.gke.io">GCP Filestore CSI</option>
+                            <option value="disk.csi.azure.com">Azure Disk CSI</option>
+                            <option value="file.csi.azure.com">Azure Files CSI</option>
+                            <option value="nfs.csi.k8s.io">NFS CSI</option>
+                            <option value="csi.vsphere.vmware.com">vSphere CSI</option>
+                            <option value="rook-ceph.rbd.csi.ceph.com">Ceph RBD (Rook)</option>
+                            <option value="rook-ceph.cephfs.csi.ceph.com">CephFS (Rook)</option>
+                            <option value="driver.longhorn.io">Longhorn</option>
+                            <option value="cinder.csi.openstack.org">OpenStack Cinder</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="csiVolumeHandle">Volume Handle / ID</label>
+                        <input type="text" id="csiVolumeHandle" placeholder="vol-0abc123def456789">
+                        <small class="help-text">Cloud volume ID (e.g., AWS EBS vol-id, GCP PD name)</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="csiCapacity">Capacity</label>
+                        <input type="text" id="csiCapacity" placeholder="50Gi" value="50Gi">
+                    </div>
+                    <div class="form-group">
+                        <label for="csiAccessMode">Access Mode</label>
+                        <select id="csiAccessMode">
+                            <option value="ReadWriteOnce">ReadWriteOnce</option>
+                            <option value="ReadOnlyMany">ReadOnlyMany</option>
+                            <option value="ReadWriteMany">ReadWriteMany</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="csiFsType">Filesystem Type</label>
+                        <select id="csiFsType">
+                            <option value="ext4">ext4</option>
+                            <option value="xfs">xfs</option>
+                            <option value="ntfs">ntfs</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="csiReadOnly">Read Only</label>
+                        <select id="csiReadOnly">
+                            <option value="false">No</option>
+                            <option value="true">Yes</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="csiMountOptions">Mount Options</label>
+                        <input type="text" id="csiMountOptions" placeholder="hard,nfsvers=4.1">
+                        <small class="help-text">Comma separated mount options</small>
                     </div>
                 </section>
 
@@ -800,6 +886,7 @@
 
     <script src="js/generators.js"></script>
     <script src="js/commands.js"></script>
+    <script src="js/helm.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>

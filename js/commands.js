@@ -103,6 +103,12 @@ function generateKubectlCommands() {
     if (resources.includes('endpoints')) {
         html += `<span class="kubectl-cmd" onclick="copyCommand(this)">kubectl get endpoints ${data.name}${ns}</span>`;
     }
+    if (resources.includes('csistorage')) {
+        html += `<span class="kubectl-cmd" onclick="copyCommand(this)">kubectl get pv ${data.name}-csi-pv</span>`;
+        html += `<span class="kubectl-cmd" onclick="copyCommand(this)">kubectl get pvc ${data.name}${ns}</span>`;
+        html += `<span class="kubectl-cmd" onclick="copyCommand(this)">kubectl get csidriver</span>`;
+        html += `<span class="kubectl-cmd" onclick="copyCommand(this)">kubectl get csinodes</span>`;
+    }
     html += `<span class="kubectl-cmd" onclick="copyCommand(this)">kubectl get all -l app=${data.name}${ns}</span>`;
     html += `</div>`;
 
@@ -203,9 +209,10 @@ function generateKubectlCommands() {
             serviceaccount: 'serviceaccount', role: 'role', rolebinding: 'rolebinding',
             clusterrole: 'clusterrole', clusterrolebinding: 'clusterrolebinding',
             limitrange: 'limitrange', resourcequota: 'resourcequota',
-            pdb: 'pdb', priorityclass: 'priorityclass', endpoints: 'endpoints'
+            pdb: 'pdb', priorityclass: 'priorityclass', endpoints: 'endpoints',
+            csistorage: 'pv'
         };
-        const rName = r === 'pv' ? `${data.name}-pv` : (r === 'storageclass' ? `${data.name}-sc` : data.name);
+        const rName = r === 'pv' ? `${data.name}-pv` : (r === 'storageclass' ? `${data.name}-sc` : (r === 'csistorage' ? `${data.name}-csi-pv` : data.name));
         html += `<span class="kubectl-cmd" onclick="copyCommand(this)">kubectl delete ${resourceNames[r]} ${rName}${ns}</span>`;
     });
     html += `</div>`;
