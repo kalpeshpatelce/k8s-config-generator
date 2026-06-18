@@ -67,6 +67,42 @@ function generateKubectlCommands() {
     if (resources.includes('networkpolicy')) {
         html += `<span class="kubectl-cmd" onclick="copyCommand(this)">kubectl get networkpolicy ${data.name}${ns}</span>`;
     }
+    if (resources.includes('serviceaccount')) {
+        html += `<span class="kubectl-cmd" onclick="copyCommand(this)">kubectl get serviceaccount ${data.name}${ns}</span>`;
+    }
+    if (resources.includes('role')) {
+        html += `<span class="kubectl-cmd" onclick="copyCommand(this)">kubectl get role ${data.name}${ns}</span>`;
+    }
+    if (resources.includes('rolebinding')) {
+        html += `<span class="kubectl-cmd" onclick="copyCommand(this)">kubectl get rolebinding ${data.name}${ns}</span>`;
+    }
+    if (resources.includes('clusterrole')) {
+        html += `<span class="kubectl-cmd" onclick="copyCommand(this)">kubectl get clusterrole ${data.name}</span>`;
+    }
+    if (resources.includes('clusterrolebinding')) {
+        html += `<span class="kubectl-cmd" onclick="copyCommand(this)">kubectl get clusterrolebinding ${data.name}</span>`;
+    }
+    if (resources.includes('pv')) {
+        html += `<span class="kubectl-cmd" onclick="copyCommand(this)">kubectl get pv ${data.name}-pv</span>`;
+    }
+    if (resources.includes('storageclass')) {
+        html += `<span class="kubectl-cmd" onclick="copyCommand(this)">kubectl get storageclass ${data.name}-sc</span>`;
+    }
+    if (resources.includes('limitrange')) {
+        html += `<span class="kubectl-cmd" onclick="copyCommand(this)">kubectl get limitrange ${data.name}${ns}</span>`;
+    }
+    if (resources.includes('resourcequota')) {
+        html += `<span class="kubectl-cmd" onclick="copyCommand(this)">kubectl get resourcequota ${data.name}${ns}</span>`;
+    }
+    if (resources.includes('pdb')) {
+        html += `<span class="kubectl-cmd" onclick="copyCommand(this)">kubectl get pdb ${data.name}${ns}</span>`;
+    }
+    if (resources.includes('priorityclass')) {
+        html += `<span class="kubectl-cmd" onclick="copyCommand(this)">kubectl get priorityclass ${data.name}</span>`;
+    }
+    if (resources.includes('endpoints')) {
+        html += `<span class="kubectl-cmd" onclick="copyCommand(this)">kubectl get endpoints ${data.name}${ns}</span>`;
+    }
     html += `<span class="kubectl-cmd" onclick="copyCommand(this)">kubectl get all -l app=${data.name}${ns}</span>`;
     html += `</div>`;
 
@@ -158,13 +194,19 @@ function generateKubectlCommands() {
     html += `<span class="kubectl-cmd" onclick="copyCommand(this)">kubectl delete -f ${data.name}.yaml${nsFlag}</span>`;
     resources.forEach(r => {
         const resourceNames = {
-            pod: 'pod', deployment: 'deployment', service: 'service',
+            namespace: 'namespace', pod: 'pod', deployment: 'deployment', service: 'service',
             replicaset: 'replicaset', statefulset: 'statefulset',
             daemonset: 'daemonset', job: 'job', cronjob: 'cronjob',
             ingress: 'ingress', configmap: 'configmap', secret: 'secret',
-            pvc: 'pvc', hpa: 'hpa', networkpolicy: 'networkpolicy'
+            pvc: 'pvc', pv: 'pv', storageclass: 'storageclass',
+            hpa: 'hpa', networkpolicy: 'networkpolicy',
+            serviceaccount: 'serviceaccount', role: 'role', rolebinding: 'rolebinding',
+            clusterrole: 'clusterrole', clusterrolebinding: 'clusterrolebinding',
+            limitrange: 'limitrange', resourcequota: 'resourcequota',
+            pdb: 'pdb', priorityclass: 'priorityclass', endpoints: 'endpoints'
         };
-        html += `<span class="kubectl-cmd" onclick="copyCommand(this)">kubectl delete ${resourceNames[r]} ${data.name}${ns}</span>`;
+        const rName = r === 'pv' ? `${data.name}-pv` : (r === 'storageclass' ? `${data.name}-sc` : data.name);
+        html += `<span class="kubectl-cmd" onclick="copyCommand(this)">kubectl delete ${resourceNames[r]} ${rName}${ns}</span>`;
     });
     html += `</div>`;
 

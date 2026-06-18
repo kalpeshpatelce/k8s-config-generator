@@ -65,6 +65,7 @@
                 <section class="form-section" data-section="resources">
                     <h2 class="section-title">Resource Types</h2>
                     <div class="checkbox-grid">
+                        <label class="checkbox-label"><input type="checkbox" name="resourceType" value="namespace"> Namespace</label>
                         <label class="checkbox-label"><input type="checkbox" name="resourceType" value="pod"> Pod</label>
                         <label class="checkbox-label"><input type="checkbox" name="resourceType" value="deployment" checked> Deployment</label>
                         <label class="checkbox-label"><input type="checkbox" name="resourceType" value="service"> Service</label>
@@ -77,8 +78,20 @@
                         <label class="checkbox-label"><input type="checkbox" name="resourceType" value="configmap"> ConfigMap</label>
                         <label class="checkbox-label"><input type="checkbox" name="resourceType" value="secret"> Secret</label>
                         <label class="checkbox-label"><input type="checkbox" name="resourceType" value="pvc"> PVC</label>
+                        <label class="checkbox-label"><input type="checkbox" name="resourceType" value="pv"> PersistentVolume</label>
+                        <label class="checkbox-label"><input type="checkbox" name="resourceType" value="storageclass"> StorageClass</label>
                         <label class="checkbox-label"><input type="checkbox" name="resourceType" value="hpa"> HPA</label>
                         <label class="checkbox-label"><input type="checkbox" name="resourceType" value="networkpolicy"> NetworkPolicy</label>
+                        <label class="checkbox-label"><input type="checkbox" name="resourceType" value="serviceaccount"> ServiceAccount</label>
+                        <label class="checkbox-label"><input type="checkbox" name="resourceType" value="role"> Role</label>
+                        <label class="checkbox-label"><input type="checkbox" name="resourceType" value="rolebinding"> RoleBinding</label>
+                        <label class="checkbox-label"><input type="checkbox" name="resourceType" value="clusterrole"> ClusterRole</label>
+                        <label class="checkbox-label"><input type="checkbox" name="resourceType" value="clusterrolebinding"> ClusterRoleBinding</label>
+                        <label class="checkbox-label"><input type="checkbox" name="resourceType" value="limitrange"> LimitRange</label>
+                        <label class="checkbox-label"><input type="checkbox" name="resourceType" value="resourcequota"> ResourceQuota</label>
+                        <label class="checkbox-label"><input type="checkbox" name="resourceType" value="pdb"> PodDisruptionBudget</label>
+                        <label class="checkbox-label"><input type="checkbox" name="resourceType" value="priorityclass"> PriorityClass</label>
+                        <label class="checkbox-label"><input type="checkbox" name="resourceType" value="endpoints"> Endpoints</label>
                     </div>
                 </section>
 
@@ -301,6 +314,422 @@
                     <div class="form-group">
                         <label for="hpaTargetCPU">Target CPU Utilization (%)</label>
                         <input type="number" id="hpaTargetCPU" value="80" min="1" max="100">
+                    </div>
+                    <div class="form-group">
+                        <label for="hpaTargetMemory">Target Memory Utilization (%)</label>
+                        <input type="number" id="hpaTargetMemory" placeholder="80" min="1" max="100">
+                        <small class="help-text">Leave empty to skip memory metric</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="hpaScaleDownStabilization">Scale Down Stabilization (s)</label>
+                        <input type="number" id="hpaScaleDownStabilization" placeholder="300">
+                    </div>
+                </section>
+
+                <!-- PersistentVolume Configuration -->
+                <section class="form-section conditional-section" data-section="pv" id="pvSection" style="display:none;">
+                    <h2 class="section-title">PersistentVolume Configuration</h2>
+                    <div class="form-group">
+                        <label for="pvCapacity">Capacity</label>
+                        <input type="text" id="pvCapacity" placeholder="10Gi" value="10Gi">
+                    </div>
+                    <div class="form-group">
+                        <label for="pvAccessMode">Access Mode</label>
+                        <select id="pvAccessMode">
+                            <option value="ReadWriteOnce">ReadWriteOnce</option>
+                            <option value="ReadOnlyMany">ReadOnlyMany</option>
+                            <option value="ReadWriteMany">ReadWriteMany</option>
+                            <option value="ReadWriteOncePod">ReadWriteOncePod</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="pvReclaimPolicy">Reclaim Policy</label>
+                        <select id="pvReclaimPolicy">
+                            <option value="Retain">Retain</option>
+                            <option value="Delete">Delete</option>
+                            <option value="Recycle">Recycle</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="pvStorageClass">Storage Class Name</label>
+                        <input type="text" id="pvStorageClass" placeholder="standard">
+                    </div>
+                    <div class="form-group">
+                        <label for="pvHostPath">Host Path</label>
+                        <input type="text" id="pvHostPath" placeholder="/mnt/data">
+                    </div>
+                    <div class="form-group">
+                        <label for="pvNfsServer">NFS Server (optional)</label>
+                        <input type="text" id="pvNfsServer" placeholder="nfs-server.example.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="pvNfsPath">NFS Path (optional)</label>
+                        <input type="text" id="pvNfsPath" placeholder="/exports/data">
+                    </div>
+                </section>
+
+                <!-- StorageClass Configuration -->
+                <section class="form-section conditional-section" data-section="storageclass" id="storageclassSection" style="display:none;">
+                    <h2 class="section-title">StorageClass Configuration</h2>
+                    <div class="form-group">
+                        <label for="scProvisioner">Provisioner</label>
+                        <select id="scProvisioner">
+                            <option value="kubernetes.io/aws-ebs">AWS EBS</option>
+                            <option value="kubernetes.io/gce-pd">GCE PD</option>
+                            <option value="kubernetes.io/azure-disk">Azure Disk</option>
+                            <option value="kubernetes.io/no-provisioner">No Provisioner (Local)</option>
+                            <option value="ebs.csi.aws.com">AWS EBS CSI</option>
+                            <option value="pd.csi.storage.gke.io">GKE PD CSI</option>
+                            <option value="disk.csi.azure.com">Azure Disk CSI</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="scReclaimPolicy">Reclaim Policy</label>
+                        <select id="scReclaimPolicy">
+                            <option value="Delete">Delete</option>
+                            <option value="Retain">Retain</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="scVolumeBindingMode">Volume Binding Mode</label>
+                        <select id="scVolumeBindingMode">
+                            <option value="Immediate">Immediate</option>
+                            <option value="WaitForFirstConsumer">WaitForFirstConsumer</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="scAllowExpansion">Allow Volume Expansion</label>
+                        <select id="scAllowExpansion">
+                            <option value="true">Yes</option>
+                            <option value="false">No</option>
+                        </select>
+                    </div>
+                </section>
+
+                <!-- RBAC Configuration -->
+                <section class="form-section conditional-section" data-section="rbac" id="rbacSection" style="display:none;">
+                    <h2 class="section-title">RBAC Configuration</h2>
+                    <div class="form-group">
+                        <label for="rbacApiGroups">API Groups</label>
+                        <input type="text" id="rbacApiGroups" placeholder='"",apps,batch'>
+                        <small class="help-text">Comma separated. Use "" for core API group</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="rbacResources">Resources</label>
+                        <input type="text" id="rbacResources" placeholder="pods,deployments,services">
+                        <small class="help-text">Comma separated</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="rbacVerbs">Verbs</label>
+                        <input type="text" id="rbacVerbs" placeholder="get,list,watch,create,update,delete">
+                        <small class="help-text">Comma separated: get, list, watch, create, update, patch, delete</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="rbacSubjectKind">Subject Kind</label>
+                        <select id="rbacSubjectKind">
+                            <option value="ServiceAccount">ServiceAccount</option>
+                            <option value="User">User</option>
+                            <option value="Group">Group</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="rbacSubjectName">Subject Name</label>
+                        <input type="text" id="rbacSubjectName" placeholder="my-service-account">
+                        <small class="help-text">Name of ServiceAccount/User/Group</small>
+                    </div>
+                </section>
+
+                <!-- PodDisruptionBudget Configuration -->
+                <section class="form-section conditional-section" data-section="pdb" id="pdbSection" style="display:none;">
+                    <h2 class="section-title">PodDisruptionBudget</h2>
+                    <div class="form-group">
+                        <label for="pdbMinAvailable">Min Available</label>
+                        <input type="text" id="pdbMinAvailable" placeholder="1 or 50%">
+                        <small class="help-text">Number or percentage. Leave empty if using maxUnavailable</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="pdbMaxUnavailable">Max Unavailable</label>
+                        <input type="text" id="pdbMaxUnavailable" placeholder="1 or 25%">
+                        <small class="help-text">Number or percentage. Leave empty if using minAvailable</small>
+                    </div>
+                </section>
+
+                <!-- LimitRange Configuration -->
+                <section class="form-section conditional-section" data-section="limitrange" id="limitrangeSection" style="display:none;">
+                    <h2 class="section-title">LimitRange Configuration</h2>
+                    <div class="form-group">
+                        <label for="lrType">Limit Type</label>
+                        <select id="lrType">
+                            <option value="Container">Container</option>
+                            <option value="Pod">Pod</option>
+                            <option value="PersistentVolumeClaim">PersistentVolumeClaim</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label for="lrDefaultCPU">Default CPU</label>
+                            <input type="text" id="lrDefaultCPU" placeholder="500m">
+                        </div>
+                        <div class="form-group half">
+                            <label for="lrDefaultMemory">Default Memory</label>
+                            <input type="text" id="lrDefaultMemory" placeholder="256Mi">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label for="lrDefaultRequestCPU">Default Request CPU</label>
+                            <input type="text" id="lrDefaultRequestCPU" placeholder="100m">
+                        </div>
+                        <div class="form-group half">
+                            <label for="lrDefaultRequestMemory">Default Request Memory</label>
+                            <input type="text" id="lrDefaultRequestMemory" placeholder="128Mi">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label for="lrMaxCPU">Max CPU</label>
+                            <input type="text" id="lrMaxCPU" placeholder="2">
+                        </div>
+                        <div class="form-group half">
+                            <label for="lrMaxMemory">Max Memory</label>
+                            <input type="text" id="lrMaxMemory" placeholder="1Gi">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label for="lrMinCPU">Min CPU</label>
+                            <input type="text" id="lrMinCPU" placeholder="50m">
+                        </div>
+                        <div class="form-group half">
+                            <label for="lrMinMemory">Min Memory</label>
+                            <input type="text" id="lrMinMemory" placeholder="64Mi">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ResourceQuota Configuration -->
+                <section class="form-section conditional-section" data-section="resourcequota" id="resourcequotaSection" style="display:none;">
+                    <h2 class="section-title">ResourceQuota Configuration</h2>
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label for="rqCPURequests">CPU Requests</label>
+                            <input type="text" id="rqCPURequests" placeholder="4">
+                        </div>
+                        <div class="form-group half">
+                            <label for="rqCPULimits">CPU Limits</label>
+                            <input type="text" id="rqCPULimits" placeholder="8">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label for="rqMemoryRequests">Memory Requests</label>
+                            <input type="text" id="rqMemoryRequests" placeholder="4Gi">
+                        </div>
+                        <div class="form-group half">
+                            <label for="rqMemoryLimits">Memory Limits</label>
+                            <input type="text" id="rqMemoryLimits" placeholder="8Gi">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label for="rqPods">Max Pods</label>
+                            <input type="number" id="rqPods" placeholder="20">
+                        </div>
+                        <div class="form-group half">
+                            <label for="rqServices">Max Services</label>
+                            <input type="number" id="rqServices" placeholder="10">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label for="rqConfigMaps">Max ConfigMaps</label>
+                            <input type="number" id="rqConfigMaps" placeholder="20">
+                        </div>
+                        <div class="form-group half">
+                            <label for="rqSecrets">Max Secrets</label>
+                            <input type="number" id="rqSecrets" placeholder="20">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="rqPVCs">Max PVCs</label>
+                        <input type="number" id="rqPVCs" placeholder="10">
+                    </div>
+                </section>
+
+                <!-- PriorityClass Configuration -->
+                <section class="form-section conditional-section" data-section="priorityclass" id="priorityclassSection" style="display:none;">
+                    <h2 class="section-title">PriorityClass Configuration</h2>
+                    <div class="form-group">
+                        <label for="pcValue">Priority Value</label>
+                        <input type="number" id="pcValue" placeholder="1000000" value="1000000">
+                        <small class="help-text">Higher value = higher priority (max: 1000000000)</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="pcGlobalDefault">Global Default</label>
+                        <select id="pcGlobalDefault">
+                            <option value="false">No</option>
+                            <option value="true">Yes</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="pcPreemptionPolicy">Preemption Policy</label>
+                        <select id="pcPreemptionPolicy">
+                            <option value="PreemptLowerPriority">PreemptLowerPriority</option>
+                            <option value="Never">Never</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="pcDescription">Description</label>
+                        <input type="text" id="pcDescription" placeholder="High priority for production workloads">
+                    </div>
+                </section>
+
+                <!-- Endpoints Configuration -->
+                <section class="form-section conditional-section" data-section="endpoints" id="endpointsSection" style="display:none;">
+                    <h2 class="section-title">Endpoints Configuration</h2>
+                    <div class="form-group">
+                        <label for="epIP">IP Address</label>
+                        <input type="text" id="epIP" placeholder="10.0.0.1">
+                        <small class="help-text">External IP to route to</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="epPort">Port</label>
+                        <input type="number" id="epPort" placeholder="3306">
+                    </div>
+                    <div class="form-group">
+                        <label for="epPortName">Port Name</label>
+                        <input type="text" id="epPortName" placeholder="mysql">
+                    </div>
+                </section>
+
+                <!-- Deployment Strategy -->
+                <section class="form-section" data-section="strategy">
+                    <h2 class="section-title">Deployment Strategy</h2>
+                    <div class="form-group">
+                        <label for="strategyType">Strategy Type</label>
+                        <select id="strategyType">
+                            <option value="RollingUpdate">RollingUpdate</option>
+                            <option value="Recreate">Recreate</option>
+                        </select>
+                    </div>
+                    <div class="form-row" id="rollingUpdateConfig">
+                        <div class="form-group half">
+                            <label for="maxSurge">Max Surge</label>
+                            <input type="text" id="maxSurge" placeholder="25%" value="25%">
+                        </div>
+                        <div class="form-group half">
+                            <label for="maxUnavailable">Max Unavailable</label>
+                            <input type="text" id="maxUnavailable" placeholder="25%" value="25%">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="minReadySeconds">Min Ready Seconds</label>
+                        <input type="number" id="minReadySeconds" placeholder="0" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="revisionHistoryLimit">Revision History Limit</label>
+                        <input type="number" id="revisionHistoryLimit" placeholder="10" value="10">
+                    </div>
+                    <div class="form-group">
+                        <label for="progressDeadlineSeconds">Progress Deadline (s)</label>
+                        <input type="number" id="progressDeadlineSeconds" placeholder="600" value="600">
+                    </div>
+                </section>
+
+                <!-- Init Containers -->
+                <section class="form-section" data-section="initcontainers">
+                    <h2 class="section-title">Init Containers</h2>
+                    <div id="initContainers">
+                        <div class="init-container-row">
+                            <input type="text" placeholder="Init Container Name" class="init-name">
+                            <input type="text" placeholder="Image (e.g., busybox:1.36)" class="init-image">
+                            <input type="text" placeholder="Command (e.g., sh,-c,sleep 5)" class="init-command">
+                            <button type="button" class="btn btn-remove" aria-label="Remove init container">&#10005;</button>
+                        </div>
+                    </div>
+                    <button type="button" id="addInitContainerBtn" class="btn btn-small">+ Add Init Container</button>
+                </section>
+
+                <!-- Security Context -->
+                <section class="form-section" data-section="security">
+                    <h2 class="section-title">Security Context</h2>
+                    <div class="form-group">
+                        <label for="runAsUser">Run As User</label>
+                        <input type="number" id="runAsUser" placeholder="1000">
+                    </div>
+                    <div class="form-group">
+                        <label for="runAsGroup">Run As Group</label>
+                        <input type="number" id="runAsGroup" placeholder="3000">
+                    </div>
+                    <div class="form-group">
+                        <label for="fsGroup">FS Group</label>
+                        <input type="number" id="fsGroup" placeholder="2000">
+                    </div>
+                    <div class="form-group">
+                        <label for="runAsNonRoot">Run As Non-Root</label>
+                        <select id="runAsNonRoot">
+                            <option value="">Not set</option>
+                            <option value="true">Yes</option>
+                            <option value="false">No</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="readOnlyRootFS">Read-Only Root Filesystem</label>
+                        <select id="readOnlyRootFS">
+                            <option value="">Not set</option>
+                            <option value="true">Yes</option>
+                            <option value="false">No</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="privileged">Privileged</label>
+                        <select id="privileged">
+                            <option value="">Not set</option>
+                            <option value="true">Yes</option>
+                            <option value="false">No</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="capabilities">Add Capabilities</label>
+                        <input type="text" id="capabilities" placeholder="NET_ADMIN,SYS_TIME">
+                        <small class="help-text">Comma separated: NET_ADMIN, SYS_TIME, etc.</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="dropCapabilities">Drop Capabilities</label>
+                        <input type="text" id="dropCapabilities" placeholder="ALL">
+                        <small class="help-text">Comma separated. Use ALL to drop all</small>
+                    </div>
+                </section>
+
+                <!-- Startup Probe -->
+                <section class="form-section" data-section="startupprobe">
+                    <h2 class="section-title">Startup Probe</h2>
+                    <div class="form-group">
+                        <label for="startupType">Probe Type</label>
+                        <select id="startupType">
+                            <option value="">None</option>
+                            <option value="httpGet">httpGet</option>
+                            <option value="tcpSocket">tcpSocket</option>
+                            <option value="exec">exec</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="startupPath">Path (httpGet)</label>
+                        <input type="text" id="startupPath" placeholder="/healthz">
+                    </div>
+                    <div class="form-group">
+                        <label for="startupPort">Port</label>
+                        <input type="number" id="startupPort" placeholder="80">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label for="startupFailureThreshold">Failure Threshold</label>
+                            <input type="number" id="startupFailureThreshold" placeholder="30" value="30">
+                        </div>
+                        <div class="form-group half">
+                            <label for="startupPeriod">Period (s)</label>
+                            <input type="number" id="startupPeriod" placeholder="10" value="10">
+                        </div>
                     </div>
                 </section>
 

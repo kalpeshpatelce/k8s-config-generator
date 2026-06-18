@@ -37,6 +37,9 @@ function setupEventListeners() {
     // Add volume mount row
     document.getElementById('addVolumeBtn').addEventListener('click', addVolumeRow);
 
+    // Add init container row
+    document.getElementById('addInitContainerBtn').addEventListener('click', addInitContainerRow);
+
     // Remove buttons (event delegation)
     document.getElementById('envVars').addEventListener('click', (e) => {
         if (e.target.classList.contains('btn-remove')) {
@@ -56,6 +59,22 @@ function setupEventListeners() {
                 handleFormChange();
             }
         }
+    });
+
+    // Init containers remove
+    document.getElementById('initContainers').addEventListener('click', (e) => {
+        if (e.target.classList.contains('btn-remove')) {
+            const rows = document.querySelectorAll('.init-container-row');
+            if (rows.length > 1) {
+                e.target.closest('.init-container-row').remove();
+                handleFormChange();
+            }
+        }
+    });
+
+    // Strategy type change
+    document.getElementById('strategyType').addEventListener('change', (e) => {
+        document.getElementById('rollingUpdateConfig').style.display = e.target.value === 'RollingUpdate' ? 'flex' : 'none';
     });
 
     // Preset selector
@@ -99,11 +118,30 @@ function handleResourceToggle(e) {
         ingress: 'ingressSection',
         cronjob: 'cronjobSection',
         hpa: 'hpaSection',
+        pv: 'pvSection',
+        storageclass: 'storageclassSection',
+        role: 'rbacSection',
+        rolebinding: 'rbacSection',
+        clusterrole: 'rbacSection',
+        clusterrolebinding: 'rbacSection',
+        pdb: 'pdbSection',
+        limitrange: 'limitrangeSection',
+        resourcequota: 'resourcequotaSection',
+        priorityclass: 'priorityclassSection',
+        endpoints: 'endpointsSection',
     };
 
     if (sectionMap[value]) {
         const section = document.getElementById(sectionMap[value]);
-        section.style.display = e.target.checked ? 'block' : 'none';
+        // For RBAC, check if any RBAC resource is still checked
+        if (['role', 'rolebinding', 'clusterrole', 'clusterrolebinding'].includes(value)) {
+            const rbacChecked = ['role', 'rolebinding', 'clusterrole', 'clusterrolebinding'].some(r =>
+                document.querySelector(`input[name="resourceType"][value="${r}"]`).checked
+            );
+            section.style.display = rbacChecked ? 'block' : 'none';
+        } else {
+            section.style.display = e.target.checked ? 'block' : 'none';
+        }
     }
 
     handleFormChange();
@@ -137,6 +175,19 @@ function addVolumeRow() {
             <option value="secret">Secret</option>
         </select>
         <button type="button" class="btn btn-remove" aria-label="Remove volume mount">&#10005;</button>
+    `;
+    container.appendChild(row);
+}
+
+function addInitContainerRow() {
+    const container = document.getElementById('initContainers');
+    const row = document.createElement('div');
+    row.className = 'init-container-row';
+    row.innerHTML = `
+        <input type="text" placeholder="Init Container Name" class="init-name">
+        <input type="text" placeholder="Image (e.g., busybox:1.36)" class="init-image">
+        <input type="text" placeholder="Command (e.g., sh,-c,sleep 5)" class="init-command">
+        <button type="button" class="btn btn-remove" aria-label="Remove init container">&#10005;</button>
     `;
     container.appendChild(row);
 }
@@ -221,11 +272,16 @@ function updateTabs(resources) {
 
 function getResourceLabel(resource) {
     const labels = {
-        pod: 'Pod', deployment: 'Deployment', service: 'Service',
+        namespace: 'Namespace', pod: 'Pod', deployment: 'Deployment', service: 'Service',
         replicaset: 'ReplicaSet', statefulset: 'StatefulSet',
         daemonset: 'DaemonSet', job: 'Job', cronjob: 'CronJob',
         ingress: 'Ingress', configmap: 'ConfigMap', secret: 'Secret',
-        pvc: 'PVC', hpa: 'HPA', networkpolicy: 'NetworkPolicy'
+        pvc: 'PVC', pv: 'PV', storageclass: 'StorageClass',
+        hpa: 'HPA', networkpolicy: 'NetworkPolicy',
+        serviceaccount: 'ServiceAccount', role: 'Role', rolebinding: 'RoleBinding',
+        clusterrole: 'ClusterRole', clusterrolebinding: 'ClusterRoleBinding',
+        limitrange: 'LimitRange', resourcequota: 'ResourceQuota',
+        pdb: 'PDB', priorityclass: 'PriorityClass', endpoints: 'Endpoints'
     };
     return labels[resource] || resource;
 }
@@ -507,6 +563,13 @@ function loadState() {
                 ingress: 'ingressSection',
                 cronjob: 'cronjobSection',
                 hpa: 'hpaSection',
+                pv: 'pvSection',
+                storageclass: 'storageclassSection',
+                pdb: 'pdbSection',
+                limitrange: 'limitrangeSection',
+                resourcequota: 'resourcequotaSection',
+                priorityclass: 'priorityclassSection',
+                endpoints: 'endpointsSection',
             };
             Object.entries(sectionMap).forEach(([resource, sectionId]) => {
                 const section = document.getElementById(sectionId);
@@ -514,6 +577,14 @@ function loadState() {
                     section.style.display = state.selectedResources.includes(resource) ? 'block' : 'none';
                 }
             });
+            // RBAC section
+            const rbacSection = document.getElementById('rbacSection');
+            if (rbacSection) {
+                const rbacChecked = ['role', 'rolebinding', 'clusterrole', 'clusterrolebinding'].some(r =>
+                    state.selectedResources.includes(r)
+                );
+                rbacSection.style.display = rbacChecked ? 'block' : 'none';
+            }
         }
 
         // Restore node port visibility
@@ -540,6 +611,14 @@ function resetForm() {
     document.getElementById('cronjobSection').style.display = 'none';
     document.getElementById('hpaSection').style.display = 'none';
     document.getElementById('nodePortGroup').style.display = 'none';
+    document.getElementById('pvSection').style.display = 'none';
+    document.getElementById('storageclassSection').style.display = 'none';
+    document.getElementById('rbacSection').style.display = 'none';
+    document.getElementById('pdbSection').style.display = 'none';
+    document.getElementById('limitrangeSection').style.display = 'none';
+    document.getElementById('resourcequotaSection').style.display = 'none';
+    document.getElementById('priorityclassSection').style.display = 'none';
+    document.getElementById('endpointsSection').style.display = 'none';
 
     // Reset env vars and volumes to single empty row
     document.getElementById('envVars').innerHTML = `
@@ -562,6 +641,14 @@ function resetForm() {
                 <option value="secret">Secret</option>
             </select>
             <button type="button" class="btn btn-remove" aria-label="Remove volume mount">&#10005;</button>
+        </div>`;
+
+    document.getElementById('initContainers').innerHTML = `
+        <div class="init-container-row">
+            <input type="text" placeholder="Init Container Name" class="init-name">
+            <input type="text" placeholder="Image (e.g., busybox:1.36)" class="init-image">
+            <input type="text" placeholder="Command (e.g., sh,-c,sleep 5)" class="init-command">
+            <button type="button" class="btn btn-remove" aria-label="Remove init container">&#10005;</button>
         </div>`;
 
     // Reset preset selector

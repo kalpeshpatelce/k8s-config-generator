@@ -226,7 +226,7 @@ input.invalid {
 .checkbox-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
+    gap: 6px;
 }
 
 .checkbox-label {
@@ -251,7 +251,7 @@ input[type="checkbox"] {
 }
 
 /* ===== Environment Variables ===== */
-.env-row, .volume-row {
+.env-row, .volume-row, .init-container-row {
     display: flex;
     gap: 8px;
     margin-bottom: 8px;
@@ -260,7 +260,8 @@ input[type="checkbox"] {
 
 .env-row input,
 .volume-row input,
-.volume-row select {
+.volume-row select,
+.init-container-row input {
     flex: 1;
     padding: 7px 10px;
     background: var(--bg-tertiary);
@@ -272,7 +273,8 @@ input[type="checkbox"] {
 
 .env-row input:focus,
 .volume-row input:focus,
-.volume-row select:focus {
+.volume-row select:focus,
+.init-container-row input:focus {
     outline: none;
     border-color: var(--accent-blue);
 }
